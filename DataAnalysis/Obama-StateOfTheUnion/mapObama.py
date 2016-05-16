@@ -4,7 +4,7 @@ import re
 from math import log
 from sets import Set
 
-#Calculates the Rawr Term Frequency + the Inverse Document Frequency as a measure
+#Calculates the Raw Term Frequency + the Inverse Document Frequency as a measure
 #of how important a word is to a document
 
 def tf_idf_raw():
