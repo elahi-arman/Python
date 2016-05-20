@@ -7,12 +7,27 @@ class BoundedHeapq():
         self._maxSize = maxSize
         self._len = 0
         self._q = []
+        self._curr = 0
 
     def __len__(self):
         return self._len
 
     def __str__(self):
         return "{}".format(self._q)
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self._curr < self._len:
+            temp = self._q[self._curr]
+            self._curr += 1
+            return temp
+        else:
+            raise StopIteration()
+
+    def __getitem__(self, key):
+        return self._q[key]
 
     def push(self, value):
 

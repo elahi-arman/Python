@@ -1,3 +1,11 @@
+''' Basic Statistics Algorithms
+
+    Mean -> calculates the average value for the distribution
+    Variance -> calculates the distance away from the mean over the distribution
+    StandardDeviation -> normalize the variance
+
+'''
+
 def mean(distribution):
     mean = 0
 
@@ -12,7 +20,6 @@ def variance(distribution):
     mn = mean(distribution)
     variance = 0
 
-    #for small number, multiplication is faster than squaring
     for val in distribution:
         variance += (val-mn) * (val-mn)
 
@@ -25,11 +32,10 @@ def standardDeviation(distribution):
 
     Covariance -> cov(x, y) = sum (xi - mean(x), yi - mean(y))/size
     Cosine -> cos(x, y) = (x dot y)/(magniteud(x) * magnitude(y))
-    Pearson ->
+    Pearson -> covariance(x, y)/(stdDev(x) * stdDev(y))
 '''
 
 def covariance (pDistribution, qDistribution):
-    #currently doesn't interpolate points, but points should be interpolated
     size = min (len(pDistribution), len(qDistribution))
     pMean = 0
     qMean = 0
@@ -65,8 +71,6 @@ def cosine(pDistribution, qDistribution):
 
     return (similarity)/(math.sqrt(xReduce) * math.sqrt(yReduce))
 
-
-
 def pearson(pDistribution, qDistribution):
 
     cov = covariance(pDistribution, qDistribution)
@@ -74,3 +78,16 @@ def pearson(pDistribution, qDistribution):
     stdDevY = standardDeviation(qDistribution)
 
     return (cov/(stdDevY*stdDevX))
+
+''' Weighting Algorithms
+
+    CaseMod -> amplify and weight the values closer to 1
+    IUF -> check for how rare it is that a person watched a certain movie, just like IDF for term frequencies
+'''
+
+def caseMod(weight):
+    amplification = 2.5
+    return (weight * pow(weight, amplification -1))
+
+def IUF(column, totalNumberUsers):
+    return math.log(np.count_nonzero(column)/totalNumberUsers)
