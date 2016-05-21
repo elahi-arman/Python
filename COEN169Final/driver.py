@@ -1,5 +1,6 @@
 from DataLoader import DataLoader
 from BoundedHeapq import BoundedHeapq
+from User import User
 
 #load initial training data
 data = DataLoader('train.txt')
@@ -16,6 +17,12 @@ with open('test10.txt') as test:
         else:
             test10[u]['rated'].append((int(m), int(r)))
 
-neighbors = data.determineNearestNeighbors(test10['301']['rated'])
+neighbors = data.kNN(test10['301']['rated'])
+avg = data.averageRating(test10['301']['rated'])
+print(avg)
+user = User('301',test10['301']['rated'], test10['301']['notrated'],neighbors, avg)
+print(test10['301']['notrated'])
 print(neighbors)
+data.cosine(user)
+
 # data.rateMovies(neighbors, test10['301']['notrated'])

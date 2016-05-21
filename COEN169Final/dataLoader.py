@@ -14,7 +14,7 @@ class DataLoader():
     def __len__(self):
         return self.__lenTraining__
 
-    def determineNearestNeighbors(self, user_ratings):
+    def kNN(self, user_ratings):
 
         '''
         Determine the nearest neighbors for a user based on the ratings they have already given
@@ -44,33 +44,14 @@ class DataLoader():
                 neighbors.push((s, i))
         return neighbors
 
-    def customRanking(self, neighbors, movies):
-        ''' Determine the ratings for movies given the nearest neighbors '''
+    def averageRating(self, movies):
+        return [np.mean(self.trainingData[:, movie]) for movie in movies]
 
-        extractedNeighbors = np.array([self.trainingData[x[1]] for x in neighbors])
-        neighborRatings = extractedNeighbors[:, movies]
+    def cosine(self, user):
+        #apply cosine to every movie that's in the neighbors and then average them all to be under 1
 
-        # print(neighbors)
-        # print(neighborRati`ngs)
-
-        ratings = []
-
-        for i in range(len(movies)):
-            currentWeight = 1
-            totalWeight = 1
-
-            for rating in neighborRatings:
-                if rating[i] != 0:
-                    # print(neighbors[i][0])
-                    # print(neighborRatings[i])
-                    weight = neighbors[i][0]
-                    totalWeight += weight
-                    currentWeight += neighborRatings[i] * weight
-
-            ratings.append(round(np.sum(currentWeight/totalWeight)/2))
-
-        ratings = [1 if r < 1 else int(r) for r in ratings ]
-
-        print(ratings)
-
-    # def cosine(self, neighbors, movies, weights):
+        aggregate_ratings = [0] * (len(user._notrated)+1)
+        for weight, neighbor in user._kNN:
+            print(neighbor)
+            for movie in user._notrated:
+                print(movie, self.trainingData[neighbor, movie])
