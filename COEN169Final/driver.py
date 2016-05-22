@@ -19,10 +19,7 @@ with open('test10.txt') as test:
 
 neighbors = data.kNN(test10['301']['rated'])
 avg = data.averageRating(test10['301']['rated'])
-print(avg)
 user = User('301',test10['301']['rated'], test10['301']['notrated'],neighbors, avg)
-print(test10['301']['notrated'])
-print(neighbors)
 data.cosine(user)
 
 # data.rateMovies(neighbors, test10['301']['notrated'])

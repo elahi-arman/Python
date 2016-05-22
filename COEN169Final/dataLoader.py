@@ -1,6 +1,7 @@
 import numpy as np
 from BoundedHeapq import BoundedHeapq
 import rankingAlgorithms as rank
+import math
 
 class DataLoader():
     """
@@ -50,8 +51,29 @@ class DataLoader():
     def cosine(self, user):
         #apply cosine to every movie that's in the neighbors and then average them all to be under 1
 
-        aggregate_ratings = [0] * (len(user._notrated)+1)
+        length = len(user._notrated)
+
+        aggregate_weights = [0] * (length)
+        aggregate_ratings = [0] * (length)
+
+        rated = [x[0] for x in user._ratings]
+        ratings = [x[1] for x in user._ratings]
+
         for weight, neighbor in user._kNN:
-            print(neighbor)
-            for movie in user._notrated:
-                print(movie, self.trainingData[neighbor, movie])
+            neighbor_ratings = [self.trainingData[neighbor][i] for i in rated]
+            weight = rank.cosine(ratings, neighbor_ratings)
+            for i in range(length):
+                if self.trainingData[neighbor, i] != 0:
+                    aggregate_weights[i] += weight
+                aggregate_ratings[i] += self.trainingData[neighbor, i] * weight
+
+        for i in range(length):
+            aggregate_weights = [1 if aggregate_weights[i] == 0 else aggregate_weights[i] for j in range(length)]
+            temp = (aggregate_ratings[i]/aggregate_weights[i])
+            if temp == 0:
+                temp = user._average
+
+            aggregate_ratings[i] = temp
+
+        print(user)
+        print([int(round(r)) for r in aggregate_ratings])
