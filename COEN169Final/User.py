@@ -1,3 +1,5 @@
+import rankingAlgorithms as rank
+
 class User():
 
     """Container class for a User"""
@@ -7,8 +9,7 @@ class User():
         self._ratings = ratings
         self._notrated = notrated
         self._kNN = kNN
-        print("Ratings", ratings)
-        self._average = rankingAlgorithms.mean([rating[1] for rating in ratings])
+        self._average = rank.mean([rating[1] for rating in ratings])
         self._averageRatings = averageRatings
 
     def __str__(self):

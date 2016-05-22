@@ -1,3 +1,5 @@
+import math
+
 ''' Basic Statistics Algorithms
 
     Mean -> calculates the average value for the distribution

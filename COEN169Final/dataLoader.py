@@ -75,5 +75,8 @@ class DataLoader():
 
             aggregate_ratings[i] = temp
 
-        print(user)
-        print([int(round(r)) for r in aggregate_ratings])
+        for i in range(length):
+            if predictedRatings[i] == 0:
+                print(u, user._notrated[i], aggregate_ratings[i])
+
+        return [int(round(r)) for r in aggregate_ratings]
