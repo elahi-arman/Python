@@ -1,6 +1,7 @@
 from DataLoader import DataLoader
 from BoundedHeapq import BoundedHeapq
 from User import User
+import rankingAlgorithms as rank
 
 #load initial training data
 data = DataLoader('train.txt')
@@ -8,9 +9,9 @@ data = DataLoader('train.txt')
 test10 = dict()
 users = []
 
-with open('10.log', 'w') as log:
+with open('result5.txt', 'w') as log:
 
-    with open('test10.txt') as test:
+    with open('test5.txt') as test:
         for line in test:
             u, m, r = line.split()
             if u not in users:
@@ -22,15 +23,14 @@ with open('10.log', 'w') as log:
             else:
                 test10[u]['rated'].append((int(m), int(r)))
 
-    for u in users:
-        neighbors = data.kNN(test10[u]['rated'])
-        avg = data.averageRating(test10[u]['rated'])
-        user = User(u,test10[u]['rated'], test10[u]['notrated'],neighbors, avg)
-        predictedRatings = data.cosine(user)
+    for usr in users:
+        neighbors = data.kNN(test10[usr]['rated'])
+        avg = data.averageRating(test10[usr]['rated'])
+        user = User(usr,test10[usr]['rated'], test10[usr]['notrated'],neighbors, avg)
+        predictedRatings = data.predict(user, rank.pearson)
 
-        print(u, user._average)
         for i in range(len(predictedRatings)):
-            log.write("{} {} {}\n".format(u, user._notrated[i], predictedRatings[i]))
+            log.write("{} {} {}\n".format(usr, user._notrated[i], predictedRatings[i]))
 
 
 

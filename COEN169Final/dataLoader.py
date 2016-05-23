@@ -1,7 +1,6 @@
+import math
 import numpy as np
 from BoundedHeapq import BoundedHeapq
-import rankingAlgorithms as rank
-import math
 
 class DataLoader():
     """
@@ -21,7 +20,7 @@ class DataLoader():
         Determine the nearest neighbors for a user based on the ratings they have already given
 
         Returns:
-            BoundedHeapq of tuples(similarity, userNumber)
+            List of ints containing the userNumbers
 
         '''
 
@@ -43,12 +42,14 @@ class DataLoader():
                 s = np.sum(np.absolute(subtracted))
                 possible_neighbors.append((s, i))
                 neighbors.push((s, i))
-        return neighbors
+
+
+        return [n[1] for n in neighbors]
 
     def averageRating(self, movies):
         return [np.mean(self.trainingData[:, movie]) for movie in movies]
 
-    def cosine(self, user):
+    def predict(self, user, algorithm):
         #apply cosine to every movie that's in the neighbors and then average them all to be under 1
 
         length = len(user._notrated)
@@ -59,24 +60,29 @@ class DataLoader():
         rated = [x[0] for x in user._ratings]
         ratings = [x[1] for x in user._ratings]
 
-        for weight, neighbor in user._kNN:
-            neighbor_ratings = [self.trainingData[neighbor][i] for i in rated]
-            weight = rank.cosine(ratings, neighbor_ratings)
-            for i in range(length):
-                if self.trainingData[neighbor, i] != 0:
+        for neighbor in user._kNN:
+
+            neighbor_ratings = self.trainingData[neighbor, rated].tolist()
+            weight = algorithm(ratings, neighbor_ratings)
+
+            lgt = min(length, len(neighbor_ratings))
+            for i in range(lgt):
+                if neighbor_ratings[i] >= 1:
                     aggregate_weights[i] += weight
-                aggregate_ratings[i] += self.trainingData[neighbor, i] * weight
+                    aggregate_ratings[i] += neighbor_ratings[i]
 
-        for i in range(length):
-            aggregate_weights = [1 if aggregate_weights[i] == 0 else aggregate_weights[i] for j in range(length)]
-            temp = (aggregate_ratings[i]/aggregate_weights[i])
-            if temp == 0:
-                temp = user._average
+            aggregate_weights = [1 if aggregate_weights[i] < 1 else aggregate_weights[j] for j in range(length)]
 
-            aggregate_ratings[i] = temp
+            for i in range(length):
+                temp = round(aggregate_ratings[i]/aggregate_weights[i])
 
-        for i in range(length):
-            if predictedRatings[i] == 0:
-                print(u, user._notrated[i], aggregate_ratings[i])
+                if temp == 0:
+                    temp = user._average
 
-        return [int(round(r)) for r in aggregate_ratings]
+                aggregate_ratings[i] = int(temp)
+
+        for i in range(len(aggregate_ratings)):
+            if aggregate_ratings[i] > 5:
+                aggregate_ratings[i] = user._average
+
+        return aggregate_ratings

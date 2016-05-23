@@ -9,7 +9,7 @@ class User():
         self._ratings = ratings
         self._notrated = notrated
         self._kNN = kNN
-        self._average = rank.mean([rating[1] for rating in ratings])
+        self._average = round(rank.mean([rating[1] for rating in ratings]))
         self._averageRatings = averageRatings
 
     def __str__(self):
