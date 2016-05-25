@@ -1,4 +1,5 @@
 import math
+import numpy as np
 
 ''' Basic Statistics Algorithms
 
@@ -29,6 +30,12 @@ def variance(distribution):
 
 def standardDeviation(distribution):
     return math.sqrt(variance(distribution)/len(distribution))
+
+def minMaxScale(distribution, scale):
+    minimum = min(distribution)
+    maximum = max(distribution)
+    denom = maximum - minimum
+    return [(x-minimum)/denom for x in distribution]
 
 ''' Correlation Algorithms
 
@@ -79,17 +86,30 @@ def pearson(pDistribution, qDistribution):
     stdDevX = standardDeviation(pDistribution)
     stdDevY = standardDeviation(qDistribution)
 
+    if stdDevX == 0:
+        stdDevX = 1
+
+    if stdDevY == 0:
+        stdDevY = 1
+
     return (cov/(stdDevY*stdDevX))
 
-''' Weighting Algorithms
+''' Modification Algorithms
 
     CaseMod -> amplify and weight the values closer to 1
     IUF -> check for how rare it is that a person watched a certain movie, just like IDF for term frequencies
 '''
 
 def caseMod(weight):
-    amplification = 2.5
-    return (weight * pow(weight, amplification -1))
+    weight /= 10       #magic constant because all weights are less than 1000
+    amplification = 1.5
+    absWeight = abs(weight)
 
-def IUF(column, totalNumberUsers):
-    return math.log(np.count_nonzero(column)/totalNumberUsers)
+    return  weight * pow(absWeight, amplification)
+
+def IUF(data, columns, totalNumberUsers):
+    return [math.log(np.count_nonzero(data[:, column])/totalNumberUsers) for column in range(totalNumberUsers)]
+
+
+def weight(alg, pDistribution, qDistributions):
+    return [alg(pDistribution, distribution) for distribution in qDistributions]
