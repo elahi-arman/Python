@@ -1,0 +1,36 @@
+Using AgglomerativeClustering and a RandomForestClassifier, there were some really bad results
+#      MAE of GIVEN 5 : 1.12742278354383
+# MAE of GIVEN 10 : 1.09116666666667
+# MAE of GIVEN 20 : 1.10494839394232
+# OVERALL MAE : 1.10893120998194
+
+def forestPredictor(self, testData, average):
+      predictedClusters = self._classifer.predict(testData)
+      predictedRatings = []
+
+      for j in range(len(testData)):
+          #each cluster corresponds to a user
+          for cluster in predictedClusters:
+              #filter out and only get the users with the same cluster number
+              neighbors = [i for i in range(self.__lenTraining__) if self._clusters.labels_[i] == cluster]
+
+              #each row contains the weight for a neighbor
+              weights = rank.weight(spearmanr, testData[j], self.trainingData[neighbors, :])
+
+              #scale the weight because it's often super small due to how sparse data is
+              weights = np.array(list(map(lambda x: x[0] * x[1] * 1000, weights))).reshape(-1, 1)
+
+              #each row represents a neighbors's ratings
+              extracted = self.trainingData[neighbors, :]
+              extracted = extracted.transpose()
+
+              predictions = []
+              for movie in extracted:
+                  predictions.append(round(np.sum(movie)/(np.count_nonzero(movie) +1 )))
+
+
+              # account for 0 values
+              predictions = [average if np.isnan(prediction) or prediction == 0 else prediction for prediction in predictions]
+              predictedRatings.append(predictions)
+
+      return predictedRatings

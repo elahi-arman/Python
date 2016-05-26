@@ -11,7 +11,6 @@ data = DataLoader('train.txt')
 
 dat = dict()
 users = []      #need this to preserve order
-
 with open('result'+dataSet+'.txt', 'w') as log:
 
     with open('test' + dataSet + '.txt') as test:
@@ -31,7 +30,7 @@ with open('result'+dataSet+'.txt', 'w') as log:
         avg = data.averageRating(dat[usr]['rated'])
         user = User(usr,dat[usr]['rated'], dat[usr]['notrated'],neighbors, avg)
         predictedRatings = data.predict(user, rank.pearson)
-        # forest = data.forestPredictor(dat[usr]['features'].reshape(1, -1), user._average)
 
-        for i in range(len(user._notrated)):
-            log.write("{} {} {}\n".format(usr, user._notrated[i], int(predictedRatings[i])))
+        # forest = data.forestPredictor(dat[usr]['features'].reshape(1, -1), user._average)
+        # for i in range(len(user._notrated)):
+            # log.write("{} {} {}\n".format(usr, user._notrated[i], int(predictedRatings[i])))
