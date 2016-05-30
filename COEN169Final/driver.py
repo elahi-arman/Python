@@ -27,8 +27,8 @@ with open('result'+dataSet+'.txt', 'w') as log:
 
     for usr in users:
         neighbors = data.kNN(dat[usr]['rated'])
-        avg = data.averageRating(dat[usr]['rated'])
-        user = User(usr,dat[usr]['rated'], dat[usr]['notrated'],neighbors, avg)
+        var = data.calculateVariance(dat[usr]['rated'])
+        user = User(usr,dat[usr]['rated'], dat[usr]['notrated'],neighbors, var)
         predictedRatings = data.predict(user, rank.pearson)
 
         # forest = data.forestPredictor(dat[usr]['features'].reshape(1, -1), user._average)

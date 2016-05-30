@@ -3,6 +3,7 @@ import numpy as np
 import rankingAlgorithms as rank
 from BoundedHeapq import BoundedHeapq
 
+
 from sklearn import svm
 np.set_printoptions(threshold=np.nan)
 
@@ -25,8 +26,33 @@ class DataLoader():
 
     def __len__(self):
         return self.__lenTraining__
+        self.__lenTraining__ = self.trainingData.shape
+        self._nClusters = 13
 
-    def kNN(self, user_ratings, IUF=True):
+        averageRatings = []
+        similarItems = []
+
+        for i in range(0, self.__lenTraining__[1]):
+            averageRatings.append(np.sum(self.trainingData[:,   i])/np.count_nonzero(self.trainingData[:, i]))
+
+        self._averageRatings = [0 if np.isnan(rating) else round(rating) for rating in averageRatings]
+
+
+        # self._similarItems = [self.KNN_Item(item) for item in similarItems]
+
+        print(self._similarItems)
+
+
+    def __len__(self):
+        return self.__lenTraining__
+
+    def KNN_Item(self, item, threshold=9):
+
+        neighbors = BoundedHeapq(threshold)
+
+        return neighbors
+
+    def kNN(self, user_ratings, IUF=True, axis=0):
 
         '''
         Determine the nearest neighbors for a user based on the ratings they have already given
@@ -36,35 +62,41 @@ class DataLoader():
 
         '''
 
-        neighbors = BoundedHeapq(40)
-        ratings, rated_movies = [], []
-        iuf = [0] * self.__lenTraining__
-        for movie, rating in user_ratings:
-            ratings.append(rating)
-            rated_movies.append(movie)
-
-        if IUF == True:
-            iuf = rank.IUF(self.trainingData, rated_movies, self.__lenTraining__)
-        # print(rated_movies)
-        extracted = self.trainingData[:, rated_movies]
-
-        possible_neighbors = []
-        for i in range(len(extracted)):
-            nz = np.count_nonzero(extracted[i])
-            if nz > 2:
-                # print(i, ratings, extracted[i])
-                subtracted = np.subtract(ratings, extracted[i])
-                s = np.sum(np.absolute(subtracted))
-                if IUF == True:
-                    s = s * iuf[i]
-                possible_neighbors.append((s, i))
-                neighbors.push((s, i))
-
-
-        return [n[1] for n in neighbors]
+        # neighbors = BoundedHeapq(8)
+        # ratings, rated_movies = [], []
+        # iuf = [0] * self.__lenTraining__[0]
+        # for movie, rating in user_ratings:
+        #     ratings.append(rating)
+        #     rated_movies.append(movie)
+        #
+        # if IUF == True:
+        #     iuf = rank.IUF(self.trainingData, rated_movies, self.__lenTraining__[0])
+        # # print(rated_movies)
+        # extracted = self.trainingData[:, rated_movies]
+        #
+        # possible_neighbors = []
+        # for i in range(len(extracted)):
+        #     nz = np.count_nonzero(extracted[i])
+        #     if nz > 2:
+        #         # print(i, ratings, extracted[i])
+        #         subtracted = np.subtract(ratings, extracted[i])
+        #         s = np.sum(np.absolute(subtracted))
+        #         if IUF == True:
+        #             s = s * iuf[i]
+        #         possible_neighbors.append((s, i))
+        #         neighbors.push((s, i))
+        #
+        # np.append(self.trainingData, user_ratings)
+        # return [n[1] for n in neighbors]
 
     def averageRating(self, movies):
         return [np.mean(self.trainingData[:, movie]) for movie in movies]
+
+    def calculateVariance(self, movies):
+        s = 0
+        for movie in movies:
+            s += abs(self._averageRatings[movie[0]] - movie[1])
+        return (s/len(movies))
 
     def predict(self, user, algorithm, caseMod=True):
         #apply cosine to every movie that's in the neighbors and then average them all to be under 1
