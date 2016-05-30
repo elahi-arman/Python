@@ -35,6 +35,8 @@ def minMaxScale(distribution, scale):
     minimum = min(distribution)
     maximum = max(distribution)
     denom = maximum - minimum
+    print(denom, maximum, minimum)
+
     return [(x-minimum)/denom for x in distribution]
 
 ''' Correlation Algorithms

@@ -1,0 +1,47 @@
+# def kNN_Col(self, item):
+  #
+  #     '''
+  #     Determine the nearest neighbors for an item based on the ratings they have already given
+  #
+  #     Returns:
+  #         List of ints containing the itemNumbers
+  #
+  #     '''
+  #
+  #     neighbors = BoundedHeapq(15)
+  #
+  #     users = [i for i in range(self.__lenTraining__[0]) if self.trainingData[i, item] > 0]
+  #     ratings = np.transpose(self.trainingData[users, item])
+  #     #contains only the rows we want to look at, then transpose it to operate on the items
+  #     extracted = self.trainingData[users, :]
+  #     extracted = np.transpose(extracted)
+  #
+  #
+  #     for i in range(len(extracted)):
+  #         nz = np.count_nonzero(extracted[i])
+  #         similarity = rank.pearson(ratings, extracted[i])
+  #             # possible_neighbors.append((similarity, i))
+  #         neighbors.push((similarity, i))
+  #
+  #     return neighbors
+
+MAE of GIVEN 5 : 0.938727022633488
+MAE of GIVEN 10 : 0.866833333333333
+MAE of GIVEN 20 : 0.862351692871612
+OVERALL MAE : 0.888524051879823
+
+Cosine similarity and Cosine Prediction
+
+MAE of GIVEN 5 : 0.94222833562586
+MAE of GIVEN 10 : 0.868
+MAE of GIVEN 20 : 0.864184431368766
+OVERALL MAE : 0.8907404367099
+
+Pearson similarity and Cosine Prediction ( no subtraction of mean)
+
+MAE of GIVEN 5 : 0.940477679129674
+MAE of GIVEN 10 : 0.865666666666667
+MAE of GIVEN 20 : 0.862158773029806
+OVERALL MAE : 0.888729272697422
+
+Pearson similarity and Cosine prediction with 0 scheme of .4 user_variance and .6 user_average

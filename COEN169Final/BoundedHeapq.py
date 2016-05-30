@@ -31,7 +31,7 @@ class BoundedHeapq():
 
     def push(self, value):
 
-        val = value[0]
+        val = abs(value[0])
 
         if self._maxHeap:
             val = val * -1

@@ -33,26 +33,16 @@ class DataLoader():
         similarItems = []
 
         for i in range(0, self.__lenTraining__[1]):
-            averageRatings.append(np.sum(self.trainingData[:,   i])/np.count_nonzero(self.trainingData[:, i]))
+            averageRatings.append(np.sum(self.trainingData[:,i])/np.count_nonzero(self.trainingData[:, i]))
 
         self._averageRatings = [0 if np.isnan(rating) else round(rating) for rating in averageRatings]
-
-
         # self._similarItems = [self.KNN_Item(item) for item in similarItems]
-
-        print(self._similarItems)
 
 
     def __len__(self):
         return self.__lenTraining__
 
-    def KNN_Item(self, item, threshold=9):
-
-        neighbors = BoundedHeapq(threshold)
-
-        return neighbors
-
-    def kNN(self, user_ratings, IUF=True, axis=0):
+    def kNN_Row(self, user_ratings, algorithm, IUF=True):
 
         '''
         Determine the nearest neighbors for a user based on the ratings they have already given
@@ -62,32 +52,35 @@ class DataLoader():
 
         '''
 
-        # neighbors = BoundedHeapq(8)
-        # ratings, rated_movies = [], []
-        # iuf = [0] * self.__lenTraining__[0]
-        # for movie, rating in user_ratings:
-        #     ratings.append(rating)
-        #     rated_movies.append(movie)
-        #
-        # if IUF == True:
-        #     iuf = rank.IUF(self.trainingData, rated_movies, self.__lenTraining__[0])
-        # # print(rated_movies)
-        # extracted = self.trainingData[:, rated_movies]
-        #
+        neighbors = BoundedHeapq(15)
+        ratings, rated_movies = [], []
         # possible_neighbors = []
-        # for i in range(len(extracted)):
-        #     nz = np.count_nonzero(extracted[i])
-        #     if nz > 2:
-        #         # print(i, ratings, extracted[i])
-        #         subtracted = np.subtract(ratings, extracted[i])
-        #         s = np.sum(np.absolute(subtracted))
-        #         if IUF == True:
-        #             s = s * iuf[i]
-        #         possible_neighbors.append((s, i))
-        #         neighbors.push((s, i))
-        #
-        # np.append(self.trainingData, user_ratings)
-        # return [n[1] for n in neighbors]
+        iuf = [0] * self.__lenTraining__[0]
+
+        #parse out the new user data
+        for movie, rating in user_ratings:
+            ratings.append(rating)
+            rated_movies.append(movie)
+
+        #apply IUF
+        if IUF == True:
+            iuf = rank.IUF(self.trainingData, rated_movies, self.__lenTraining__[0])
+
+        #contains only the columns we actually want to look at
+        extracted = self.trainingData[:, rated_movies]
+
+        for i in range(len(extracted)):
+            nz = np.count_nonzero(extracted[i])
+            # need to have at least 2 similar movies
+            if nz > 2:
+                similarity = algorithm(ratings, extracted[i])
+                if IUF == True:
+                    similarity = similarity * iuf[i]
+                # possible_neighbors.append((similarity, i))
+                neighbors.push((similarity, i))
+
+        np.append(self.trainingData, user_ratings)
+        return neighbors
 
     def averageRating(self, movies):
         return [np.mean(self.trainingData[:, movie]) for movie in movies]
@@ -95,47 +88,49 @@ class DataLoader():
     def calculateVariance(self, movies):
         s = 0
         for movie in movies:
-            s += abs(self._averageRatings[movie[0]] - movie[1])
+            s += (self._averageRatings[movie[0]] - movie[1])
         return (s/len(movies))
 
     def predict(self, user, algorithm, caseMod=True):
-        #apply cosine to every movie that's in the neighbors and then average them all to be under 1
-
         length = len(user._notrated)
+        predictions = []
 
-        aggregate_weights = [0] * (length)
-        aggregate_ratings = [0] * (length)
 
-        rated = [x[0] for x in user._ratings]
-        ratings = [x[1] for x in user._ratings]
+        neighbors_ratings = self.trainingData[[n[1] for n in user._kNN], :]
+        neighbors_ratings = neighbors_ratings[:,user._notrated]
 
-        for neighbor in user._kNN:
-
-            neighbor_ratings = self.trainingData[neighbor, rated].tolist()
-            weight = algorithm(ratings, neighbor_ratings)
-
-            lgt = min(length, len(neighbor_ratings))
-            for i in range(lgt):
-                if neighbor_ratings[i] >= 1:
-                    aggregate_weights[i] += weight
-                    aggregate_ratings[i] += neighbor_ratings[i]
-
-            aggregate_weights = [1 if aggregate_weights[i] < 1 else aggregate_weights[j] for j in range(length)]
-
+        for i in range(neighbors_ratings.shape[0]):
             if caseMod == True:
-                aggregate_weights = list(map(rank.caseMod, aggregate_weights))
+                weighted_ratings = np.multiply(neighbors_ratings[i, :], rank.caseMod(user._kNN[i][0]))
+            else:
+                weighted_ratings = np.multiply(neighbors_ratings[i, :], user._kNN[i][0])
 
-            for i in range(length):
-                temp = round(aggregate_ratings[i]/aggregate_weights[i])
+        print(weighted_ratings)
 
-                if temp == 0:
-                    temp = user._average
+        for i in range(neighbors_ratings.shape[1]):
+            col = neighbors_ratings[:, i]
+            predictions.append(np.sum(col)/np.count_nonzero(col))
 
-                aggregate_ratings[i] = int(temp)
+        predictions = [int(round(p)) if p > 0 else 0 for p in predictions]
 
-        for i in range(len(aggregate_ratings)):
-            if aggregate_ratings[i] > 5:
-                aggregate_ratings[i] = user._average
+        # print(predictions)
+        # for i in range(length):
+        #     if predictions[i] == 0:
+        #         predictions[i] = int(round((self._averageRatings[user._notrated[i]]-user._variance) * .4 + user._average * .6))
+        #     if predictions[i] < 1 or predictions[i] > 5:
+        #         predictions[i] = user._average
+
+        return predictions
+
+        # for neighbor in user._kNN:
+        #
+        #     #set up the data needed for this neighbor
+        #     neighbor_ratings = self.trainingData[neighbor, notrated].tolist()
+        #     weight = algorithm(ratings, neighbor_ratings)
+        #
+        #     for i in range(length):
+        #         if neighbor_ratings[i] >= 0:
+        #             aggregate_ratings[i] += neighbor_ratings[i] * weight
 
         return aggregate_ratings
 

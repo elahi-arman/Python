@@ -1,4 +1,4 @@
-from DataLoader import DataLoader
+from dataLoader import DataLoader
 from BoundedHeapq import BoundedHeapq
 from User import User
 import rankingAlgorithms as rank
@@ -26,11 +26,10 @@ with open('result'+dataSet+'.txt', 'w') as log:
                 dat[u]['features'][int(m)] = int(r)
 
     for usr in users:
-        neighbors = data.kNN(dat[usr]['rated'])
+        neighbors = data.kNN_Row(dat[usr]['rated'], rank.pearson)
         var = data.calculateVariance(dat[usr]['rated'])
         user = User(usr,dat[usr]['rated'], dat[usr]['notrated'],neighbors, var)
         predictedRatings = data.predict(user, rank.pearson)
 
-        # forest = data.forestPredictor(dat[usr]['features'].reshape(1, -1), user._average)
-        # for i in range(len(user._notrated)):
-            # log.write("{} {} {}\n".format(usr, user._notrated[i], int(predictedRatings[i])))
+        for i in range(len(user._notrated)):
+            log.write("{} {} {}\n".format(usr, user._notrated[i], int(predictedRatings[i])))
