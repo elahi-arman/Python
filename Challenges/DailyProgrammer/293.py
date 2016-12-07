@@ -55,6 +55,15 @@ def easy(sequence):
         print('Sorry the given sequence is not iterable')
 
 def medium2(sequence):
+    # You have to start with either with a white or a red wire.
+    # If you picked white wire you can either pick another white wire again or you can take an orange one.
+    # If you picked a red wire you have the choice between a black and red wire.
+    # When a second red wire is picked, you can start from rule one again.
+    # Back to the second rule, if you picked another white one you will have to pick a black or red one now
+    # When the red wire is picked, you again go to rule one.
+    # On the other hand if you then picked an orange wire, you can choose between green, orange and black.
+    # When you are at the point where you can choose between green, orange and black and you pick either green or orange you have to choose the other one and then the bomb is defused.
+    # If you ever pick a black wire you will be at the point where you have to choose between green, orange and black
 
     sm = StateMachine(7)
 
@@ -84,68 +93,6 @@ def medium2(sequence):
             return 'Bomb Defused'
 
     return 'Boom'
-
-def medium(sequence):
-    # You have to start with either with a white or a red wire.
-    # If you picked white wire you can either pick another white wire again or you can take an orange one.
-    # If you picked a red wire you have the choice between a black and red wire.
-    # When a second red wire is picked, you can start from rule one again.
-    # Back to the second rule, if you picked another white one you will have to pick a black or red one now
-    # When the red wire is picked, you again go to rule one.
-    # On the other hand if you then picked an orange wire, you can choose between green, orange and black.
-    # When you are at the point where you can choose between green, orange and black and you pick either green or orange you have to choose the other one and then the bomb is defused.
-    # If you ever pick a black wire you will be at the point where you have to choose between green, orange and black
-
-    states = {
-        0: 'r,w',
-        1: 'w,o',
-        2: 'b,r',
-        3: 'g,o,b',
-        4: 'g',
-        5: 'o'
-    }
-
-    current_state = 0
-    for wire in sequence:
-        color = wire[0]
-        if color not in states[current_state]:
-            break
-        else:
-            if current_state is 0:
-                if color == 'r':
-                    current_state = 2
-                else:
-                    current_state = 1
-            elif current_state is 1:
-                if color == 'w':
-                    current_state = 2
-                else:
-                    current_state = 3
-            elif current_state is 2:
-                if color == 'r':
-                    current_state = 0
-                else:
-                    current_state = 3
-            elif current_state is 3:
-                if color == 'b':
-                    current_state = 3
-                elif color == 'g':
-                    current_state = 5
-                else:
-                    current_state = 4
-            elif current_state is 4:
-                if color == 'g':
-                    print('Bomb Defused')
-                    return
-                else:
-                    break
-            else:
-                if color == 'o':
-                    print('Bomb Defused')
-                    return
-                else:
-                    break
-    print('Boom')
 
 if __name__ == '__main__':
     sequence = []
