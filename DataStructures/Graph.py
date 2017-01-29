@@ -4,7 +4,6 @@ from collections import namedtuple
 class Graph():
 
     Edge = namedtuple('Edge', 'nextVertex weight')
-    DirtyVertex = namedTuple('DirtyVertex', 'vertex weight')
 
     def __init__(self):
         self.vertices = {}
@@ -44,32 +43,56 @@ class Graph():
             start - key in vertex
 
         Return:
-            weights - list of triples (in, out, weight)
+            murr
 
         Raises:
             KeyError - starting node could not be found
         """
 
-        dirtyNodes = []
-        queue = []
+        leaves, dirtyNodes = ({}, {})
+        upEdges, queue = ([], [])
         dag = Graph()
 
         try:
             queue.append(start)
+            dirtyNodes[start] = 1
         except KeyError:
             print ('Could not find starting node: {}'.format(start), file=sys.stderr)
             return []
 
         for node in queue:
-            # enqueue the neighbors
-            print ('Processing {}'.format(node))
             dag.addVertex(node)
-            dirtyNodes.append(node)
-            notDirtyNeighbors = [edge.nextVertex for edge in self.vertices[node] if edge.nextVertex not in dirtyNodes]
+            weight = dirtyNodes[node] + 1
+            notDirtyNeighbors = []
+
+            for edge in self.vertices[node]:
+                if edge.nextVertex not in dirtyNodes:
+                    print ('Processing {} with weight {}'.format(node, weight))
+                    notDirtyNeighbors.append(edge.nextVertex)
+                elif dirtyNodes[edge.nextVertex] == weight:
+                    dag.addDirectedEdge(node, edge.nextVertex)
+                    upEdges.append((edge.nextVertex, node))
 
             queue.extend(notDirtyNeighbors)
 
             for neighbor in notDirtyNeighbors:
+                dirtyNodes[neighbor] = weight
                 dag.addDirectedEdge(node, neighbor)
+                upEdges.append((neighbor, node))
 
-        print (dag)
+        for vertex in self.vertices:
+            num_occurrences = len([v for v in upEdges if v[0] == vertex])
+            if len(dag.vertices[vertex]) == 0:
+                leaves[vertex] =  1/num_occurrences
+
+        return (dag, leaves)
+
+    # should go into directed_acyclic_graph class
+    def calculate_betweeness(self, node, leaves):
+        if node in leaves:
+            return leaves[node]
+        else:
+            weight = 0
+            for child in self.vertices[node]:
+                weight += self.calculate_betweeness(child.nextVertex, leaves)
+            return weight + 1
