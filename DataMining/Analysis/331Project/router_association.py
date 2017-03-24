@@ -128,5 +128,5 @@ if __name__ == '__main__':
     predictions = dt.predict(test).tolist()
     open('golden.csv', 'a').write(','.join([hash_to_location[p] for p in predictions]))
 
-    # get_code(dt, features, targets)
+    get_code(dt, features, targets)
     get_accuracy('golden.csv')
