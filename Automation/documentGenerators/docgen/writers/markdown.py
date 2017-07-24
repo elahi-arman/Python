@@ -1,4 +1,4 @@
-from docgen.writers.base import Base
+from Docgen.Writers.Base import Base
 
 class MarkdownGenerator(Base):
     """docstring for MarkdownGenerator."""
@@ -10,8 +10,9 @@ class MarkdownGenerator(Base):
         """Write self.document to open filehandle, return true on success"""
         try:
             for element in self.document:
+                print(element.string)
                 filehandle.write(element.string)
-                return True
+            return True
         except IOError:
             return False
 
@@ -20,7 +21,7 @@ class MarkdownGenerator(Base):
         """Converts string to paragraph, adds lines if shouldContinue."""
         if not shouldContinue:
             return MarkdownGenerator.Element('p', '{}\n\n'.format(string))
-        return MarkdownGenerator.Element('p', '{}\n')
+        return MarkdownGenerator.Element('p', '{}\n'.format(string))
 
     @staticmethod
     def heading(string):
@@ -36,14 +37,14 @@ class MarkdownGenerator(Base):
     def unordered_list(currentList):
         """Convert currentList into a set of unordered list items."""
         return MarkdownGenerator.Element('ul', '{}\n\n'.format(
-            ['* {}\n'.format(string) for string in currentList]
+            '\n'.join(['* {}'.format(string) for string in currentList])
         ))
 
     @staticmethod
     def ordered_list(currentList):
         """Convert currentList into a set of ordered list items."""
         return MarkdownGenerator.Element('ol', '{}\n\n'.format(
-            ['1. {}\n'.format(string) for string in currentList]
+            '\n'.join(['1. {}'.format(string) for string in currentList])
         ))
 
     @staticmethod
@@ -74,6 +75,6 @@ class MarkdownGenerator(Base):
     @staticmethod
     def code_block(codeLines):
         """Convert list of strings to a set of preformatted code lines."""
-        return MarkdownGenerator.Element('pre', '{}'.format(
-            ['\t{}\n'.format(loc) for loc in codeLines])
-        )
+        return MarkdownGenerator.Element('pre', '{}\n'.format(
+            '\n'.join(['\t{}'.format(loc) for loc in codeLines])
+        ))

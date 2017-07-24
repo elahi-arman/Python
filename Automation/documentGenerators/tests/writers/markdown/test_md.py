@@ -1,12 +1,12 @@
-from docgen.writers.MarkdownGenerator import MarkdownGenerator
+from Docgen.Writers.Markdown import MarkdownGenerator
 
 def test_paragraph():
      out =  MarkdownGenerator.paragraph('herp')
      assert out.semantic == 'p'
      assert out.string == 'herp\n'
 
-def test_paragraph_continue():
-    out =  MarkdownGenerator.paragraph('herp', True)
+def test_paragraph_no_continue():
+    out =  MarkdownGenerator.paragraph('herp', shouldContinue=False)
     assert out.semantic == 'p'
     assert out.string == 'herp\n\n'
 
@@ -22,13 +22,16 @@ def test_subheading():
 
 def test_unordered_list():
     out = MarkdownGenerator.unordered_list(['herp', 'derp', 'boop'])
+    print(out.string)
     assert out.semantic == 'ul'
-    assert out.string == '* herp\n* derp \n* boop\n'
+    assert out.string == '* herp\n* derp\n* boop\n\n'
 
 def test_ordered_list():
     out = MarkdownGenerator.ordered_list(['herp', 'derp', 'boop'])
+    print(out.string)
+
     assert out.semantic == 'ol'
-    assert out.string == '1. herp\n1. derp \n1. boop\n'
+    assert out.string == '1. herp\n1. derp\n1. boop\n\n'
 
 def test_link():
     out = MarkdownGenerator.link('herp', 'derp')
@@ -37,7 +40,7 @@ def test_link():
 
 def test_image():
     out = MarkdownGenerator.image('herp', 'derp')
-    assert out.semantic == 'a'
+    assert out.semantic == 'img'
     assert out.string == '![herp](derp)'
 
 def test_bold():
@@ -57,7 +60,7 @@ def test_inline_code():
 
 def test_code_block():
     out = MarkdownGenerator.code_block(['herp', 'derp', 'boop'])
-    assert out.semantic == pre
+    assert out.semantic == 'pre'
     assert out.string == '\therp\n\tderp\n\tboop\n'
 
 def test_successful_write():
@@ -65,13 +68,16 @@ def test_successful_write():
 
     doc = MarkdownGenerator()
     doc.document = [
-        Markdown.Element('h1', 'Test Document'),
-        Markdown.Element('p', 'Yay, wrote something out')
+        MarkdownGenerator.heading('Test Document'),
+        MarkdownGenerator.paragraph('Yay, wrote something out')
     ]
 
     f = io.StringIO()
     doc.write(f)
+    f.seek(0)
 
-    assert (f.read() ==
-        MarkdownGenerator.heading('Test Document'.string) +
-        MarkdownGenerator.paragraph('Yay, wrote something out'.string))
+    output = f.read()
+
+    assert (output ==
+        MarkdownGenerator.heading('Test Document').string +
+        MarkdownGenerator.paragraph('Yay, wrote something out').string)

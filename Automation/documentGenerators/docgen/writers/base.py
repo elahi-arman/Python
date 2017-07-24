@@ -1,7 +1,7 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from collections import namedtuple
 
-class Base(metaclass=ABC):
+class Base(ABC):
     Element = namedtuple('Element', 'semantic string')
 
     @abstractmethod
